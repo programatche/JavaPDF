@@ -7,11 +7,22 @@ package blankpdf;
 
 import java.awt.Desktop;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.print.attribute.standard.DateTimeAtCompleted;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -27,6 +38,8 @@ public class BlankPDF extends javax.swing.JFrame {
     /**
      * Creates new form TestePDF
      */
+    String nomepdfenviado;
+    
     public BlankPDF() {
         initComponents();
     }
@@ -42,6 +55,9 @@ public class BlankPDF extends javax.swing.JFrame {
 
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JSeparator();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -59,21 +75,52 @@ public class BlankPDF extends javax.swing.JFrame {
             }
         });
 
+        jButton3.setText("Enviar PDF");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        jButton4.setText("Abrir PDF");
+        jButton4.setEnabled(false);
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(55, 55, 55)
-                .addComponent(jButton1)
-                .addGap(39, 39, 39)
-                .addComponent(jButton2)
-                .addContainerGap(105, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(55, 55, 55)
+                        .addComponent(jButton1)
+                        .addGap(39, 39, 39)
+                        .addComponent(jButton2))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 362, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(44, 44, 44)
+                        .addComponent(jButton3)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton4)))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(178, Short.MAX_VALUE)
+                .addContainerGap(66, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton3)
+                    .addComponent(jButton4))
+                .addGap(18, 18, 18)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(55, 55, 55)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2))
@@ -100,6 +147,69 @@ public class BlankPDF extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fc = new JFileChooser();
+        //Abre a caixa de diálogo para selecionar o arquivo
+        int res = fc.showOpenDialog(null);
+
+        if (res == JFileChooser.APPROVE_OPTION) {
+            //pegar o arquivo selecionado
+            File file = fc.getSelectedFile();
+            Path origem, destino;
+            origem = file.toPath();
+            Date d = new Date();
+            nomepdfenviado = d.getTime() +  ".pdf";
+            InputStream is = null;
+            OutputStream os = null;
+            try {
+                is = new FileInputStream(file);
+                File f = new File(nomepdfenviado);
+                f.createNewFile();
+				
+
+                os = new FileOutputStream(f,false); // buffer size 1K 
+                
+			
+                byte[] buf = new byte[1024];
+                int bytesRead;
+                
+                    while ((bytesRead = is.read(buf)) > 0) {
+                        os.write(buf, 0, bytesRead);
+                    }
+                jButton4.setEnabled(true);
+                JOptionPane.showMessageDialog(null, "Pdf copiado com sucesso");
+                } catch (IOException ex) {
+                    Logger.getLogger(BlankPDF.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+             finally {
+                try {
+                    is.close();
+                    os.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(BlankPDF.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+            }
+
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+        if (Desktop.isDesktopSupported()) {
+            try {
+                //System.getProperty("user.dir") é a raiz do projeto
+                File myFile = new File(nomepdfenviado);
+                Desktop.getDesktop().open(myFile);
+            } catch (IOException ex) {
+                // no application registered for PDFs
+            }
+        }
+        jButton4.setEnabled(false);
+    }//GEN-LAST:event_jButton4ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -156,11 +266,10 @@ public class BlankPDF extends javax.swing.JFrame {
             ///Users/marcelosiedler/Google%20Drive/bage/2016_02/BlankPDF/build/classes/blankpdf/silviosantos.jpg
             //imagem = PDImageXObject.createFromFile("/Users/marcelosiedler/Google Drive/bage/2016_02/BlankPDF/build/classes/blankpdf/sparta.png", doc);
 
-            
             content.beginText();
             content.setFont(PDType1Font.TIMES_BOLD, 26);
             content.newLineAtOffset(10, 750);
-            content.showText("Gincana IFSUL");
+            content.showText("Gincana IFSUL2");
             content.endText();
 
             content.beginText();
@@ -168,7 +277,7 @@ public class BlankPDF extends javax.swing.JFrame {
             content.newLineAtOffset(80, 700);
             content.showText("Turma : ");
             content.endText();
-           
+
             content.drawImage(imagem, 75, 500);
 
             content.close();
@@ -188,5 +297,8 @@ public class BlankPDF extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JSeparator jSeparator1;
     // End of variables declaration//GEN-END:variables
 }
